@@ -28,11 +28,6 @@
         }
       ]
     }
-  ],
-  "env": {
-    "VITE_API_URL": "@vite_api_url",
-    "VITE_CRISP_WEBSITE_ID": "@vite_crisp_website_id",
-    "VITE_GA_MEASUREMENT_ID": "@vite_ga_measurement_id"
-  }
+  ]
 }
 
