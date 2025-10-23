@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "8081:8081"
+    environment:
+      - VITE_API_URL=http://backend:3001/api
+    depends_on:
+      - backend
+    networks:
+      - aiwork-network
+
+  # Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/aiwork
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - FRONTEND_URL=http://localhost:8081
+    depends_on:
+      - mongodb
+    networks:
+      - aiwork-network
+    volumes:
+      - ./backend/logs:/app/logs
+
+  # Database
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=aiwork
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - aiwork-network
+
+  # Redis (for caching and sessions)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - aiwork-network
+
+volumes:
+  mongodb_data:
+  redis_data:
+
+networks:
+  aiwork-network:
+    driver: bridge
